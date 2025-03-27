@@ -38,6 +38,11 @@ def whatsapp_webhook():
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": user_message}]
         )
-        bot_reply =_
+        bot_reply = response.choices[0].message["content"]
+
+        # Aqui podes mais tarde adicionar o envio da resposta para o WhatsApp
+
+    return "OK", 200  # Retorno necessário para evitar erro 500 no Render
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
