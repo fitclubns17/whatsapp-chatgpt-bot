@@ -33,20 +33,16 @@ def whatsapp_webhook():
         user_message = message["text"]["body"]
         sender = message["from"]
 
-        # Gerar resposta com OpenAI
+        print(f"Mensagem recebida: {user_message}")
+        print(f"Número de destino: {sender}")
+
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": user_message}]
         )
         bot_reply = response.choices[0].message["content"]
+        print(f"Resposta gerada: {bot_reply}")
 
-# 👇 Adiciona estas linhas para depuração no Render
-print("Mensagem recebida:", user_message)
-print("Resposta gerada:", bot_reply)
-print("Número de destino:", sender)
-
-
-        # Enviar resposta para o WhatsApp
         url = f"https://graph.facebook.com/v17.0/{PHONE_ID}/messages"
         headers = {
             "Authorization": f"Bearer {WHATSAPP_TOKEN}",
@@ -62,6 +58,7 @@ print("Número de destino:", sender)
         requests.post(url, headers=headers, json=payload)
 
     return "Mensagem recebida", 200
+
 
 # Iniciar o servidor
 if __name__ == "__main__":
