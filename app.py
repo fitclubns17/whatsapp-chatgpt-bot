@@ -29,34 +29,34 @@ def whatsapp_webhook():
     data = request.get_json()
 
     if "messages" in data and len(data["messages"]) > 0:
-    message = data["messages"][0]
-    user_message = message["text"]["body"]
-    sender = message["from"]
+        message = data["messages"][0]
+        user_message = message["text"]["body"]
+        sender = message["from"]
 
-    # Resposta com OpenAI
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": user_message}]
-    )
-    bot_reply = response.choices[0].message["content"]
+        # Gerar resposta com OpenAI
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": user_message}]
+        )
+        bot_reply = response.choices[0].message["content"]
 
-    # Enviar resposta para o WhatsApp
-    url = f"https://graph.facebook.com/v17.0/{PHONE_ID}/messages"
-    headers = {
-        "Authorization": f"Bearer {WHATSAPP_TOKEN}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "messaging_product": "whatsapp",
-        "to": sender,
-        "type": "text",
-        "text": {"body": bot_reply}
-    }
+        # Enviar resposta para o WhatsApp
+        url = f"https://graph.facebook.com/v17.0/{PHONE_ID}/messages"
+        headers = {
+            "Authorization": f"Bearer {WHATSAPP_TOKEN}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "messaging_product": "whatsapp",
+            "to": sender,
+            "type": "text",
+            "text": {"body": bot_reply}
+        }
 
-    requests.post(url, headers=headers, json=payload)
+        requests.post(url, headers=headers, json=payload)
 
+    return "Mensagem recebida", 200
 
-    return "Mensagem recebida", 200  # Sempre devolver 200 para o Render não dar erro
-
+# Iniciar o servidor
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
