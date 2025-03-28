@@ -40,6 +40,12 @@ def whatsapp_webhook():
         )
         bot_reply = response.choices[0].message["content"]
 
+# 👇 Adiciona estas linhas para depuração no Render
+print("Mensagem recebida:", user_message)
+print("Resposta gerada:", bot_reply)
+print("Número de destino:", sender)
+
+
         # Enviar resposta para o WhatsApp
         url = f"https://graph.facebook.com/v17.0/{PHONE_ID}/messages"
         headers = {
