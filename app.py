@@ -62,5 +62,9 @@ def whatsapp_webhook():
 
 
 # Iniciar o servidor
+@app.route("/", methods=["GET"])
+def home():
+    return "✅ O bot está online e a funcionar! 👋"
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
