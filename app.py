@@ -43,6 +43,7 @@ def whatsapp_webhook():
         bot_reply = response.choices[0].message["content"]
         print(f"Resposta gerada: {bot_reply}")
 
+        # Enviar resposta para o WhatsApp
         url = f"https://graph.facebook.com/v17.0/{PHONE_ID}/messages"
         headers = {
             "Authorization": f"Bearer {WHATSAPP_TOKEN}",
@@ -55,8 +56,14 @@ def whatsapp_webhook():
             "text": {"body": bot_reply}
         }
 
-        r = requests.post(url, headers=headers, json=payload)
-        print("Resposta do WhatsApp:", r.status_code, r.text)  # Debug
+        print("="*30)
+        print("➡️ A enviar para a Meta:")
+        print("URL:", url)
+        print("Headers:", headers)
+        print("Payload:", payload)
+
+        response_whatsapp = requests.post(url, headers=headers, json=payload)
+        print("📨 Resposta da Meta:", response_whatsapp.status_code, response_whatsapp.text)
 
     return "Mensagem recebida", 200
 
