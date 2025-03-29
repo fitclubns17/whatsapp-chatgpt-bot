@@ -38,17 +38,32 @@ def whatsapp_webhook():
         print(f"📩 Mensagem recebida: {user_message}")
         print(f"📞 Número de destino: {sender}")
 
-        # Gerar resposta com OpenAI
-        try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[{"role": "user", "content": user_message}]
-            )
-            bot_reply = response.choices[0].message["content"]
-            print(f"🧠 Resposta gerada: {bot_reply}")
-        except Exception as e:
-            print("❌ Erro ao gerar resposta com OpenAI:", str(e))
-            bot_reply = "Houve um erro ao tentar gerar a resposta. Tenta novamente mais tarde."
+        # Respostas automáticas locais
+        respostas_rapidas = {
+            "olá": "Olá! 👋 Como te posso ajudar hoje?",
+            "quem és tu": "Sou um assistente virtual do FITCLUB, pronto para te ajudar! 💪",
+            "como estás": "Estou sempre operacional, obrigado por perguntares! 😄"
+        }
+
+        mensagem_normalizada = user_message.strip().lower()
+        bot_reply = None
+
+        if len(user_message.strip()) < 3:
+            bot_reply = "Mensagem muito curta. Podes escrever algo mais completo? 🙂"
+        elif mensagem_normalizada in respostas_rapidas:
+            bot_reply = respostas_rapidas[mensagem_normalizada]
+        else:
+            # Gerar resposta com OpenAI
+            try:
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[{"role": "user", "content": user_message}]
+                )
+                bot_reply = response.choices[0].message["content"]
+                print(f"🧠 Resposta gerada: {bot_reply}")
+            except Exception as e:
+                print("❌ Erro ao gerar resposta com OpenAI:", str(e))
+                bot_reply = "Houve um erro ao tentar gerar a resposta. Tenta novamente mais tarde."
 
         # Enviar resposta para o WhatsApp
         url = f"https://graph.facebook.com/v17.0/{PHONE_ID}/messages"
@@ -66,7 +81,6 @@ def whatsapp_webhook():
         print("="*30)
         print("➡️ A enviar para a Meta:")
         print("URL:", url)
-        print("Headers:", headers)
         print("Payload:", payload)
 
         try:
@@ -77,7 +91,7 @@ def whatsapp_webhook():
 
     return "Mensagem recebida", 200
 
-# Iniciar o servidor
+# Página inicial para teste rápido
 @app.route("/", methods=["GET"])
 def home():
     return "✅ O bot está online e a funcionar! 👋"
