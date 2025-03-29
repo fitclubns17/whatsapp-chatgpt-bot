@@ -3,18 +3,17 @@ import requests
 import openai
 import os
 
-# Configurar as chaves de API com variáveis de ambiente
+# Carregar variáveis de ambiente
 WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
 PHONE_ID = os.getenv("PHONE_ID")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "fitclub_bot")
 
 openai.api_key = OPENAI_API_KEY
 
 app = Flask(__name__)
 
-# Rota para validação do Webhook (necessário para Meta)
-VERIFY_TOKEN = "fitclub_bot"
-
+# Rota de verificação do webhook
 @app.route("/webhook", methods=["GET"])
 def verify():
     token_sent = request.args.get("hub.verify_token")
@@ -23,75 +22,57 @@ def verify():
         return challenge
     return "Invalid verification token", 403
 
-# Rota para processar mensagens recebidas
+# Rota para processar mensagens recebidas do WhatsApp
 @app.route("/webhook", methods=["POST"])
 def whatsapp_webhook():
     data = request.get_json()
     print("📦 Dados recebidos no webhook:")
     print(data)
 
-    if "messages" in data and len(data["messages"]) > 0:
-        message = data["messages"][0]
-        user_message = message["text"]["body"]
-        sender = message["from"]
+    messages = data.get("messages", [])
+    if messages:
+        message = messages[0]
+        user_message = message.get("text", {}).get("body")
+        sender = message.get("from")
 
-        print(f"📩 Mensagem recebida: {user_message}")
-        print(f"📞 Número de destino: {sender}")
+        print(f"📨 Mensagem recebida: {user_message}")
+        print(f"📞 Número: {sender}")
 
-        # Respostas automáticas locais
-        respostas_rapidas = {
-            "olá": "Olá! 👋 Como te posso ajudar hoje?",
-            "quem és tu": "Sou um assistente virtual do FITCLUB, pronto para te ajudar! 💪",
-            "como estás": "Estou sempre operacional, obrigado por perguntares! 😄"
-        }
-
-        mensagem_normalizada = user_message.strip().lower()
-        bot_reply = None
-
-        if len(user_message.strip()) < 3:
-            bot_reply = "Mensagem muito curta. Podes escrever algo mais completo? 🙂"
-        elif mensagem_normalizada in respostas_rapidas:
-            bot_reply = respostas_rapidas[mensagem_normalizada]
-        else:
+        if user_message and sender:
             # Gerar resposta com OpenAI
             try:
-                response = openai.ChatCompletion.create(
+                completion = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=[{"role": "user", "content": user_message}]
                 )
-                bot_reply = response.choices[0].message["content"]
-                print(f"🧠 Resposta gerada: {bot_reply}")
+                bot_reply = completion.choices[0].message["content"]
             except Exception as e:
-                print("❌ Erro ao gerar resposta com OpenAI:", str(e))
-                bot_reply = "Houve um erro ao tentar gerar a resposta. Tenta novamente mais tarde."
+                print("❌ Erro na OpenAI:", e)
+                bot_reply = "Ocorreu um erro ao gerar a resposta."
 
-        # Enviar resposta para o WhatsApp
-        url = f"https://graph.facebook.com/v17.0/{PHONE_ID}/messages"
-        headers = {
-            "Authorization": f"Bearer {WHATSAPP_TOKEN}",
-            "Content-Type": "application/json"
-        }
-        payload = {
-            "messaging_product": "whatsapp",
-            "to": sender,
-            "type": "text",
-            "text": {"body": bot_reply}
-        }
+            # Enviar resposta via WhatsApp
+            url = f"https://graph.facebook.com/v17.0/{PHONE_ID}/messages"
+            headers = {
+                "Authorization": f"Bearer {WHATSAPP_TOKEN}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "messaging_product": "whatsapp",
+                "to": sender,
+                "type": "text",
+                "text": {"body": bot_reply}
+            }
 
-        print("="*30)
-        print("➡️ A enviar para a Meta:")
-        print("URL:", url)
-        print("Payload:", payload)
+            print("➡️ Enviar para a Meta:")
+            print("URL:", url)
+            print("Payload:", payload)
 
-        try:
-            response_whatsapp = requests.post(url, headers=headers, json=payload)
-            print("📨 Resposta da Meta:", response_whatsapp.status_code, response_whatsapp.text)
-        except Exception as e:
-            print("❌ Erro ao enviar mensagem para o WhatsApp:", str(e))
+            response = requests.post(url, headers=headers, json=payload)
+            print("📬 Resposta Meta:", response.status_code, response.text)
 
     return "Mensagem recebida", 200
 
-# Página inicial para teste rápido
+# Página inicial
 @app.route("/", methods=["GET"])
 def home():
     return "✅ O bot está online e a funcionar! 👋"
