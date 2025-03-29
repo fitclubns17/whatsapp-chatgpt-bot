@@ -55,7 +55,8 @@ def whatsapp_webhook():
             "text": {"body": bot_reply}
         }
 
-        requests.post(url, headers=headers, json=payload)
+        r = requests.post(url, headers=headers, json=payload)
+        print("Resposta do WhatsApp:", r.status_code, r.text)  # Debug
 
     return "Mensagem recebida", 200
 
