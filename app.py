@@ -27,6 +27,7 @@ def verify():
 @app.route("/webhook", methods=["POST"])
 def whatsapp_webhook():
     data = request.get_json()
+    print("📦 Dados recebidos da Meta:", data)
 
     if "messages" in data and len(data["messages"]) > 0:
         message = data["messages"][0]
