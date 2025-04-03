@@ -81,7 +81,7 @@ def whatsapp_webhook():
 
             pergunta_normalizada = user_message.lower().strip()
 
-            if category == "service" or pricing_type == "free":
+            if message.get("type") == "text" and message.get("text", {}).get("body"):
                 if pergunta_normalizada in respostas_frequentes:
                     bot_reply = respostas_frequentes[pergunta_normalizada]
                 else:
