@@ -81,27 +81,28 @@ def whatsapp_webhook():
 
             pergunta_normalizada = user_message.lower().strip()
 
-            if message.get("type") == "text" and message.get("text", {}).get("body"):
-                if pergunta_normalizada in respostas_frequentes:
-                    bot_reply = respostas_frequentes[pergunta_normalizada]
-                else:
-                    try:
-                        completion = openai.ChatCompletion.create(
-                            model="gpt-3.5-turbo",
-                            messages=[{"role": "user", "content": user_message}]
-                        )
-                        bot_reply = completion.choices[0].message["content"]
-                    except Exception as e:
-                        print("❌ Erro na OpenAI:", str(e))
-                        bot_reply = "Desculpa, não consegui responder agora. Tenta mais tarde."
+           if message.get("type") == "text" and message.get("text", {}).get("body"):
+    # Mensagem dentro da janela gratuita → responde normalmente
+    if resposta:
+        bot_reply = resposta
+    else:
+        try:
+            completion = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": user_message}]
+            )
+            bot_reply = completion.choices[0].message["content"]
+        except Exception as e:
+            print("❌ Erro na OpenAI:", str(e))
+            bot_reply = "Desculpa, não consegui responder agora. Tenta mais tarde."
 
-                send_text_message(sender, bot_reply)
-                registar_conversa(user_message, bot_reply)
+    send_text_message(sender, bot_reply)
+    registar_conversa(user_message, bot_reply)
 
-            else:
-                print("⚠️ Mensagem fora da janela gratuita.")
-                print("📨 A enviar mensagem template para reabrir a conversa...")
-                send_template_message(sender)
+else:
+    print("⚠️ Mensagem fora da janela gratuita.")
+    print("📨 A enviar mensagem template para reabrir a conversa...")
+    send_template_message(sender)
 
     except Exception as e:
         print("❌ Erro geral no webhook:", str(e))
