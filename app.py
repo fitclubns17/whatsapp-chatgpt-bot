@@ -78,7 +78,7 @@ def whatsapp_webhook():
                 print(f"🆔 Conversa ID: {conversation_id}")
                 print(f"📨 Mensagem de: {sender} → {user_message}")
 
-                if category == "service" or pricing_type == "free":
+                if not billable or pricing_type == "free":
                     if resposta:
                         bot_reply = resposta
                     else:
