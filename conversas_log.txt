@@ -1,0 +1,30 @@
+2025-04-03 21:53:25.178373 - Pergunta: Olá assistente do Fitclub. Qual é a mensalidade?
+Resposta: Desculpa, não consegui responder agora. Tenta mais tarde.
+----------------------------------------
+2025-04-03 21:53:40.171993 - Pergunta: quero ir experimentar uma aula
+Resposta: Desculpa, não consegui responder agora. Tenta mais tarde.
+----------------------------------------
+2025-04-03 21:53:51.800435 - Pergunta: O que preciso de levar para a aula?
+Resposta: Desculpa, não consegui responder agora. Tenta mais tarde.
+----------------------------------------
+2025-04-03 21:56:16.969511 - Pergunta: Olá preciso da tua ajuda. Qual é a mensalidade?
+Resposta: Desculpa, não consegui responder agora. Tenta mais tarde.
+----------------------------------------
+2025-04-03 22:15:06.910981 - Pergunta: O que é o fitclub?
+Resposta: Desculpa, não consegui responder agora. Tenta mais tarde.
+----------------------------------------
+2025-04-03 22:15:28.732066 - Pergunta: Mensalidade e horário
+Resposta: Desculpa, não consegui responder agora. Tenta mais tarde.
+----------------------------------------
+2025-04-03 22:22:14.815962 - Pergunta: Quero experimentar uma aula.
+Resposta: Ótimo! Existem diversas opções de aulas que você pode experimentar, como aulas de dança, aulas de yoga, aulas de pilates, aulas de fitness, entre outras. Você pode pesquisar por aulas disponíveis na sua região e escolher aquela que mais te interessa. Não se esqueça de verificar a disponibilidade de horários e fazer a sua inscrição com antecedência. Aproveite a sua aula e divirta-se!
+----------------------------------------
+2025-04-03 22:22:32.079376 - Pergunta: onde é o estúdio de fitness?
+Resposta: O estúdio de fitness pode estar localizado em diferentes lugares, como em academias, centros de fitness, estúdios especializados em determinadas modalidades de exercício, salas de treinamento pessoal, entre outros. O melhor é pesquisar locais específicos na sua região que ofereçam os serviços de fitness que você está procurando.
+----------------------------------------
+2025-04-03 22:24:34.456518 - Pergunta: o que é o fitclub?
+Resposta: O Fitclub é um espaço dedicado à prática de exercícios físicos e promoção da saúde e bem-estar, geralmente oferecido por academias ou locais especializados. Nele, os participantes podem realizar atividades como aulas de dança, treinamento funcional, musculação, pilates, entre outras modalidades, visando a melhoria da condição física e qualidade de vida. Além disso, o Fitclub pode oferecer também serviços de nutrição, fisioterapia e acompanhamento personalizado para auxiliar na conquista de objetivos individuais.
+----------------------------------------
+2025-04-03 22:31:20.302674 - Pergunta: o que é o fitclub?
+Resposta: O Fitclub é um grupo ou comunidade de pessoas que se reúnem regularmente para participar de atividades físicas, como treinos de academia, corridas, caminhadas, entre outras modalidades esportivas. Geralmente, o objetivo do Fitclub é promover a prática de exercícios físicos, incentivar um estilo de vida saudável e criar um ambiente de apoio e motivação para os participantes alcançarem seus objetivos de condicionamento físico. Muitas vezes, os Fitclubs são organizados por instrutores de fitness, personal trainers ou entusiastas da vida saudável.
+----------------------------------------
