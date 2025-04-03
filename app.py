@@ -66,7 +66,11 @@ def whatsapp_webhook():
                     "fazem planos alimentares": "Sim, temos esse serviço extra para alunos com objetivo de perda de peso. Custa 25€."
                 }
 
-                resposta = respostas_frequentes.get(pergunta_normalizada)
+                resposta = None
+                for pergunta, resposta_possivel in respostas_frequentes.items():
+                    if pergunta.lower() in pergunta_normalizada:
+                        resposta = resposta_possivel
+                        break
                 billable = pricing_info.get("billable", False)
                 category = pricing_info.get("category", "unknown")
                 pricing_type = pricing_info.get("type", "unknown")
