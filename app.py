@@ -108,11 +108,15 @@ def whatsapp_webhook():
             billable = pricing_info.get("billable", False)
             category = pricing_info.get("category", "unknown")
             pricing_type = pricing_info.get("type", "unknown")
+            conversation_id = conversation.get("id", "N/A")
 
-            print(f"💰 Tipo: {pricing_type}, 🧾 Categoria: {category}, 💵 Faturável: {billable}")
+           print(f"💰 Tipo de mensagem: {pricing_type}")
+           print(f"🧾 Categoria: {category}")
+           print(f"💵 Faturável: {'Sim' if billable else 'Não'}")
+           print(f"🆔 Conversa ID: {conversation_id}")
+           print(f"📨 Mensagem de: {sender} → {user_message}")
 
-            if category == "service" or pricing_type == "free":
-                resposta = encontrar_resposta(user_message)
+            if not billable or pricing_type == "free" or category == "service":
                 if resposta:
                     bot_reply = resposta
                 else:
@@ -129,7 +133,8 @@ def whatsapp_webhook():
                 send_text_message(sender, bot_reply)
                 registar_conversa(user_message, bot_reply)
             else:
-                print("⚠️ Fora da janela gratuita. A enviar template...")
+                print("⚠️ Mensagem fora da janela gratuita.")
+                print("📨 A enviar mensagem template para reabrir a conversa...")
                 send_template_message(sender)
 
     except Exception as e:
