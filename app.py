@@ -77,3 +77,108 @@ def encontrar_resposta(pergunta):
         if any(palavra in pergunta for palavra in item["keywords"]):
             return item["resposta"]
     return None
+
+@app.route("/webhook", methods=["GET"])
+def verify():
+    token_sent = request.args.get("hub.verify_token")
+    challenge = request.args.get("hub.challenge")
+    return challenge if token_sent == VERIFY_TOKEN else ("Invalid verification token", 403)
+
+@app.route("/webhook", methods=["POST"])
+def whatsapp_webhook():
+    data = request.get_json()
+    print("📦 Webhook recebido:")
+    print(data)
+
+    try:
+        entry = data.get("entry", [])[0]
+        changes = entry.get("changes", [])[0]
+        value = changes.get("value", {})
+        messages = value.get("messages", [])
+        pricing_info = value.get("pricing", {})
+        conversation = value.get("conversation", {})
+
+        if messages:
+            message = messages[0]
+            user_message = message.get("text", {}).get("body")
+            sender = message.get("from")
+
+            print(f"📨 Mensagem de: {sender} → {user_message}")
+
+            billable = pricing_info.get("billable", False)
+            category = pricing_info.get("category", "unknown")
+            pricing_type = pricing_info.get("type", "unknown")
+
+            print(f"💰 Tipo: {pricing_type}, 🧾 Categoria: {category}, 💵 Faturável: {billable}")
+
+            if category == "service" or pricing_type == "free":
+                resposta = encontrar_resposta(user_message)
+                if resposta:
+                    bot_reply = resposta
+                else:
+                    try:
+                        completion = openai.ChatCompletion.create(
+                            model="gpt-3.5-turbo",
+                            messages=[{"role": "user", "content": user_message}]
+                        )
+                        bot_reply = completion.choices[0].message["content"]
+                    except Exception as e:
+                        print("❌ Erro na OpenAI:", str(e))
+                        bot_reply = "Desculpa, não consegui responder agora. Tenta mais tarde."
+
+                send_text_message(sender, bot_reply)
+                registar_conversa(user_message, bot_reply)
+            else:
+                print("⚠️ Fora da janela gratuita. A enviar template...")
+                send_template_message(sender)
+
+    except Exception as e:
+        print("❌ Erro geral no webhook:", str(e))
+
+    return "Mensagem processada", 200
+
+def send_text_message(to, text):
+    url = f"https://graph.facebook.com/v17.0/{PHONE_ID}/messages"
+    headers = {
+        "Authorization": f"Bearer {WHATSAPP_TOKEN}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": to,
+        "type": "text",
+        "text": {"body": text}
+    }
+
+    print("➡️ A enviar resposta para Meta:")
+    print("Payload:", payload)
+    response = requests.post(url, headers=headers, json=payload)
+    print("📬 Resposta Meta:", response.status_code, response.text)
+
+def send_template_message(to):
+    url = f"https://graph.facebook.com/v17.0/{PHONE_ID}/messages"
+    headers = {
+        "Authorization": f"Bearer {WHATSAPP_TOKEN}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": to,
+        "type": "template",
+        "template": {
+            "name": TEMPLATE_NAME,
+            "language": { "code": "pt_PT" }
+        }
+    }
+
+    print("➡️ Enviar template:")
+    print("Payload:", payload)
+    response = requests.post(url, headers=headers, json=payload)
+    print("📬 Resposta da Meta (template):", response.status_code, response.text)
+
+@app.route("/", methods=["GET"])
+def home():
+    return "✅ O bot está online e funcional! 👋"
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
