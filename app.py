@@ -110,11 +110,14 @@ def whatsapp_webhook():
             pricing_type = pricing_info.get("type", "unknown")
             conversation_id = conversation.get("id", "N/A")
 
-           print(f"💰 Tipo de mensagem: {pricing_type}")
-           print(f"🧾 Categoria: {category}")
-           print(f"💵 Faturável: {'Sim' if billable else 'Não'}")
-           print(f"🆔 Conversa ID: {conversation_id}")
-           print(f"📨 Mensagem de: {sender} → {user_message}")
+            print(f"💰 Tipo de mensagem: {pricing_type}")
+            print(f"🧾 Categoria: {category}")
+            print(f"💵 Faturável: {'Sim' if billable else 'Não'}")
+            print(f"🆔 Conversa ID: {conversation_id}")
+            print(f"📨 Mensagem de: {sender} → {user_message}")
+
+            # 👉 Procurar resposta antes de avançar
+            resposta = encontrar_resposta(user_message)
 
             if not billable or pricing_type == "free" or category == "service":
                 if resposta:
