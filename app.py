@@ -1,149 +1,75 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 import requests
-import openai
 import os
-from datetime import datetime
+
+app = Flask(__name__)
 
 # Variáveis de ambiente
 WHATSAPP_TOKEN = os.getenv("ACCESS_TOKEN")
 PHONE_ID = os.getenv("PHONE_ID")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "fitclub_bot")
-TEMPLATE_NAME = os.getenv("TEMPLATE_NAME", "reabrir_conversa")
+TEMPLATE_NAME = os.getenv("TEMPLATE_NAME", "menu_fitclub_bot")
 
-openai.api_key = OPENAI_API_KEY
+# Caminho para imagens
+STATIC_FOLDER = "static"
+HORARIO_IMG = "horario.png"
 
-app = Flask(__name__)
-LOG_FILE = "conversas_log.txt"
+# Rota para servir a imagem
+@app.route("/static/<path:filename>")
+def static_files(filename):
+    return send_from_directory(STATIC_FOLDER, filename)
 
-def registar_conversa(entrada, resposta):
-    with open(LOG_FILE, "a", encoding="utf-8") as f:
-        f.write(f"{datetime.now()} - Pergunta: {entrada}\nResposta: {resposta}\n{'-'*40}\n")
-
-# Perguntas frequentes com keywords
-respostas_frequentes = [
-    {
-        "keywords": ["o que é", "fitclub"],
-        "resposta": "O Fitclub é um estúdio de fitness que ajuda mulheres ocupadas a sentirem-se mais confiantes através do treino, mesmo que nunca tenham treinado antes!"
-    },
-    {
-        "keywords": ["como funciona", "aulas"],
-        "resposta": "As sessões são aulas de grupo de treino funcional de 45 minutos no Pavilhão da ADC de Vila Verde. Temos aulas às 9:15 e 18:15."
-    },
-    {
-        "keywords": ["inscrever", "inscrição"],
-        "resposta": "É simples! Vai a https://fitclubns17.systeme.io/principal , preenche os dados e recebe tudo por e-mail (confirma o spam)."
-    },
-    {
-        "keywords": ["preço", "mensalidade", "quanto"],
-        "resposta": "A mensalidade é de 30€. A primeira inclui taxa de inscrição de 15€."
-    },
-    {
-        "keywords": ["avaliação", "mensal"],
-        "resposta": "Sim! Todos os meses há avaliação da composição corporal e avaliação física."
-    },
-    {
-        "keywords": ["experimentar", "teste", "aula"],
-        "resposta": "Sim! Marca a tua aula experimental pelo número +351 962 854 426 indicando o horário preferido."
-    },
-    {
-        "keywords": ["plataforma", "treino", "online"],
-        "resposta": "A nossa plataforma é https://fitclubns17.pt/"
-    },
-    {
-        "keywords": ["ajuda", "aceder", "técnico"],
-        "resposta": "Pede apoio no grupo de Apoio Técnico - Plataforma."
-    },
-    {
-        "keywords": ["pagar", "mensalidade", "mbway"],
-        "resposta": "Podes pagar em numerário ou por MBWAY para o número 962854426 com a indicação do nome e mês."
-    },
-    {
-        "keywords": ["levar", "trazer", "equipamento", "sapatilhas"],
-        "resposta": "É obrigatório usar sapatilhas próprias (não usadas na rua) no estúdio. Também podes levar água e toalha (opcional)."
-    },
-    {
-        "keywords": ["plano alimentar", "nutrição", "alimentação"],
-        "resposta": "Sim, temos esse serviço extra para alunos com objetivo de perda de peso. Custa 25€."
-    }
-]
-
-def encontrar_resposta(pergunta):
-    pergunta = pergunta.lower()
-    for item in respostas_frequentes:
-        if any(palavra in pergunta for palavra in item["keywords"]):
-            return item["resposta"]
-    return None
+@app.route("/", methods=["GET"])
+def home():
+    return "✅ Bot WhatsApp do Fitclub está online!"
 
 @app.route("/webhook", methods=["GET"])
 def verify():
     token_sent = request.args.get("hub.verify_token")
     challenge = request.args.get("hub.challenge")
-    return challenge if token_sent == VERIFY_TOKEN else ("Invalid verification token", 403)
+    return challenge if token_sent == VERIFY_TOKEN else ("Token de verificação inválido", 403)
 
 @app.route("/webhook", methods=["POST"])
-def whatsapp_webhook():
+def webhook():
     data = request.get_json()
-    print("📦 Webhook recebido:")
+    print("📩 Webhook recebido:")
     print(data)
 
     try:
-        entry = data.get("entry", [])[0]
-        changes = entry.get("changes", [])[0]
-        value = changes.get("value", {})
-        messages = value.get("messages", [])
-        pricing_info = value.get("pricing", {})
-        conversation = value.get("conversation", {})
-
+        messages = data["entry"][0]["changes"][0]["value"].get("messages", [])
         if messages:
             message = messages[0]
-            user_message = message.get("text", {}).get("body")
-            sender = message.get("from")
+            sender = message["from"]
 
-            print(f"📨 Mensagem de: {sender} → {user_message}")
+            if message["type"] == "button":
+                button_text = message["button"]["text"].lower()
+                print(f"🔘 Botão clicado: {button_text}")
 
-            billable = pricing_info.get("billable", False)
-            category = pricing_info.get("category", "unknown")
-            pricing_type = pricing_info.get("type", "unknown")
-            conversation_id = conversation.get("id", "N/A")
+                respostas = {
+                    "como são as aulas": "As aulas são de treino funcional em grupo com duração de 45 minutos, usando barras, halteres, bandas e peso corporal.",
+                    "mensalidade": "A mensalidade é de 30€. O pagamento pode ser feito em numerário ou por MBWAY para o número 962854426 com a indicação do nome e mês.",
+                    "planos alimentares": "Sim, temos esse serviço por 25€ para quem quer perder peso.",
+                    "o que levar para a aula": "Usa sapatilhas próprias (não usadas na rua). Podes trazer água e toalha (opcional).",
+                    "quero inscrever-me já": "Para te inscreveres já, vai a https://fitclubns17.systeme.io/principal e preenche os dados (confirma o SPAM).",
+                    "marcar aula experimental": "Marca a tua aula experimental pelo número +351 962 854 426 indicando o horário preferido.",
+                    "dificuldades plataforma": "Se tiveres dificuldades técnicas, acede ao grupo de Apoio Técnico - Plataforma."
+                }
 
-            print(f"💰 Tipo de mensagem: {pricing_type}")
-            print(f"🧾 Categoria: {category}")
-            print(f"💵 Faturável: {'Sim' if billable else 'Não'}")
-            print(f"🆔 Conversa ID: {conversation_id}")
-            print(f"📨 Mensagem de: {sender} → {user_message}")
-
-            # 👉 Procurar resposta antes de avançar
-            resposta = encontrar_resposta(user_message)
-
-            if not billable or pricing_type == "free" or category == "service":
-                if resposta:
-                    bot_reply = resposta
+                if button_text == "horário":
+                    image_url = "https://whatsapp-chatgpt-bot-aosj.onrender.com/static/horario.png"
+                    send_image_message(sender, image_url, "Este é o horário das aulas no Fitclub.")
+                elif button_text in respostas:
+                    send_text_message(sender, respostas[button_text])
                 else:
-                    try:
-                        completion = openai.ChatCompletion.create(
-                            model="gpt-3.5-turbo",
-                            messages=[{"role": "user", "content": user_message}]
-                        )
-                        bot_reply = completion.choices[0].message["content"]
-                    except Exception as e:
-                        print("❌ Erro na OpenAI:", str(e))
-                        bot_reply = "Desculpa, não consegui responder agora. Tenta mais tarde."
-
-                send_text_message(sender, bot_reply)
-                registar_conversa(user_message, bot_reply)
-            else:
-                print("⚠️ Mensagem fora da janela gratuita.")
-                print("📨 A enviar mensagem template para reabrir a conversa...")
-                send_template_message(sender)
+                    send_text_message(sender, "Botão não reconhecido. Tenta novamente.")
 
     except Exception as e:
-        print("❌ Erro geral no webhook:", str(e))
+        print("❌ Erro:", str(e))
 
-    return "Mensagem processada", 200
+    return "Mensagem recebida", 200
 
 def send_text_message(to, text):
     url = f"https://graph.facebook.com/v17.0/{PHONE_ID}/messages"
@@ -157,13 +83,12 @@ def send_text_message(to, text):
         "type": "text",
         "text": {"body": text}
     }
-
-    print("➡️ A enviar resposta para Meta:")
-    print("Payload:", payload)
+    print("📤 Enviar texto:", payload)
     response = requests.post(url, headers=headers, json=payload)
-    print("📬 Resposta Meta:", response.status_code, response.text)
+    print("📬 Resposta da Meta:", response.status_code, response.text)
 
-def send_template_message(to):
+# Enviar imagem com link público
+def send_image_message(to, image_url, caption):
     url = f"https://graph.facebook.com/v17.0/{PHONE_ID}/messages"
     headers = {
         "Authorization": f"Bearer {WHATSAPP_TOKEN}",
@@ -172,21 +97,16 @@ def send_template_message(to):
     payload = {
         "messaging_product": "whatsapp",
         "to": to,
-        "type": "template",
-        "template": {
-            "name": TEMPLATE_NAME,
-            "language": { "code": "pt_PT" }
+        "type": "image",
+        "image": {
+            "link": image_url,
+            "caption": caption
         }
     }
-
-    print("➡️ Enviar template:")
-    print("Payload:", payload)
+    print("🖼️ Enviar imagem:", payload)
     response = requests.post(url, headers=headers, json=payload)
-    print("📬 Resposta da Meta (template):", response.status_code, response.text)
+    print("📬 Resposta da Meta:", response.status_code, response.text)
 
-@app.route("/", methods=["GET"])
-def home():
-    return "✅ O bot está online e funcional! 👋"
-
+# 👇 ESTA PARTE DEVE ESTAR NO FIM DO FICHEIRO
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
