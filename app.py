@@ -56,7 +56,7 @@ def webhook():
 
                 respostas = {
                     "como são as aulas": "São aulas de grupo de treino funcional de 45 minutos, nas quais usamos vários materiais (barras, halteres, bandas, peso corporal) para desenvolver as diversas capacidades físicas através do treino de padrões motores básicos (agachar, empurrar, puxar, levantar).",
-                    "Onde é o estúdio": "O estúdio é no Pavilhão Gimnodesportivo da ADC de Vila Verde.",
+                    "onde é o estúdio": "O Fitclub fica no Pavilhão da ADC de Vila Verde. Fácil acesso e com estacionamento gratuito!",
                     "mensalidade": "A mensalidade é de 30€. O pagamento pode ser feito em numerário ou por MBWAY para o número 962854426 com a indicação do nome e mês.",
                     "planos alimentares": "Sim, temos esse serviço por 25€ para quem quer perder peso.",
                     "o que levar para a aula": "Usa sapatilhas próprias (não usadas na rua). Podes trazer água e toalha (opcional).",
