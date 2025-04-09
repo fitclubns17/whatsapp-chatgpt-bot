@@ -39,11 +39,17 @@ def webhook():
     print(data)
 
     try:
-        messages = data["entry"][0]["changes"][0]["value"].get("messages", [])
+        value = data["entry"][0]["changes"][0]["value"]
+        messages = value.get("messages", [])
+        pricing_info = value.get("pricing", {})
+        category = pricing_info.get("category", "unknown")
+        pricing_type = pricing_info.get("type", "unknown")
+
         if messages:
             message = messages[0]
             sender = message["from"]
 
+            # Caso o utilizador clique num botão
             if message["type"] == "button":
                 button_text = message["button"]["text"].lower()
                 print(f"🔘 Botão clicado: {button_text}")
@@ -60,14 +66,23 @@ def webhook():
 
                 if button_text == "horário":
                     image_url = "https://whatsapp-chatgpt-bot-aosj.onrender.com/static/horario.png"
-                    send_image_message(sender, image_url, "Este é o horário das aulas no Fitclub.")
+                    send_image_message(sender, image_url, "🕒 Este é o horário das aulas no Fitclub.")
                 elif button_text in respostas:
                     send_text_message(sender, respostas[button_text])
                 else:
                     send_text_message(sender, "Botão não reconhecido. Tenta novamente.")
 
+            # Se for mensagem normal → enviar template apenas se estiver dentro da janela gratuita
+            elif message["type"] == "text":
+                if not pricing_info or category == "service" or pricing_type == "free":
+                    print("📨 Mensagem de texto recebida → Enviar template com botões")
+                    send_template_message(sender)
+                else:
+                    print("⛔ Fora da janela de 24h → Enviar template para reabrir conversa")
+                    send_template_message(sender)
+
     except Exception as e:
-        print("❌ Erro:", str(e))
+        print("❌ Erro no webhook:", str(e))
 
     return "Mensagem recebida", 200
 
@@ -87,7 +102,6 @@ def send_text_message(to, text):
     response = requests.post(url, headers=headers, json=payload)
     print("📬 Resposta da Meta:", response.status_code, response.text)
 
-# Enviar imagem com link público
 def send_image_message(to, image_url, caption):
     url = f"https://graph.facebook.com/v17.0/{PHONE_ID}/messages"
     headers = {
@@ -105,8 +119,26 @@ def send_image_message(to, image_url, caption):
     }
     print("🖼️ Enviar imagem:", payload)
     response = requests.post(url, headers=headers, json=payload)
-    print("📬 Resposta da Meta:", response.status_code, response.text)
+    print("📬 Resposta da Meta (imagem):", response.status_code, response.text)
 
-# 👇 ESTA PARTE DEVE ESTAR NO FIM DO FICHEIRO
+def send_template_message(to):
+    url = f"https://graph.facebook.com/v17.0/{PHONE_ID}/messages"
+    headers = {
+        "Authorization": f"Bearer {WHATSAPP_TOKEN}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": to,
+        "type": "template",
+        "template": {
+            "name": TEMPLATE_NAME,
+            "language": { "code": "pt_PT" }
+        }
+    }
+    print("📤 Enviar template:", payload)
+    response = requests.post(url, headers=headers, json=payload)
+    print("📬 Resposta da Meta (template):", response.status_code, response.text)
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
