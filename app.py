@@ -11,7 +11,7 @@ app = Flask(__name__)
 WHATSAPP_TOKEN = os.getenv("ACCESS_TOKEN")
 PHONE_ID = os.getenv("PHONE_ID")
 VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "fitclub_bot")
-TEMPLATE_NAME = os.getenv("TEMPLATE_NAME", "menu_fitclub_bot")
+TEMPLATE_NAME = os.getenv("TEMPLATE_NAME", "menu_fitclub_bot_v2")
 
 # Caminho para imagens
 STATIC_FOLDER = "static"
@@ -56,13 +56,13 @@ def webhook():
 
                 respostas = {
                     "como são as aulas": "São aulas de grupo de treino funcional de 45 minutos, nas quais usamos vários materiais (barras, halteres, bandas, peso corporal) para desenvolver as diversas capacidades físicas através do treino de padrões motores básicos (agachar, empurrar, puxar, levantar).",
-                    "onde é o estúdio": "O Fitclub fica no Pavilhão da ADC de Vila Verde. Fácil acesso e com estacionamento gratuito!",
+                    "onde é o estúdio": "O Fitclub fica no Pavilhão da ADC de Vila Verde. Fácil acesso e estacionamento gratuito!",
                     "mensalidade": "A mensalidade é de 30€. O pagamento pode ser feito em numerário ou por MBWAY para o número 962854426 com a indicação do nome e mês.",
-                    "planos alimentares": "Sim, temos esse serviço por 25€ para quem quer perder peso.",
+                    "planos alimentares": "Sim, temos esse serviço por 25€ para quem quer perder peso. Contacta o número +351962854426 para prosseguir.",
                     "o que levar para a aula": "Usa sapatilhas próprias (não usadas na rua). Podes trazer água e toalha (opcional).",
                     "quero inscrever-me já": "Para te inscreveres já, vai a https://fitclubns17.systeme.io/principal e preenche os dados (confirma o SPAM).",
-                    "marcar aula experimental": "Marca a tua aula experimental pelo número +351 962 854 426 indicando o horário preferido.",
-                    "dificuldades plataforma": "Se tiveres dificuldades técnicas, acede ao grupo de Apoio Técnico - Plataforma."
+                    "marcar aula experimental": "Marca a tua aula experimental pelo número +351962854426 indicando o horário preferido.",
+                    "dificuldades plataforma": "Se tiveres dificuldades técnicas, acede ao grupo de Apoio Técnico - Plataforma, que o técnico entra em contacto contigo."
                 }
 
                 if button_text == "horário":
